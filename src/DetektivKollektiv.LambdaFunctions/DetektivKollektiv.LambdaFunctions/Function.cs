@@ -1,12 +1,10 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
-using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using DetektivKollektiv.DataLayer;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -34,18 +32,12 @@ namespace DetektivKollektiv.LambdaFunctions
         public async Task<APIGatewayProxyResponse> GetRandomItemAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             context.Logger.LogLine("Get Request\n");
-            var randomItem = await InternalGetRandomItemAsync();
-            var response = new APIGatewayProxyResponse
-            {
-                StatusCode = (int)HttpStatusCode.OK,
-                Body = JsonConvert.SerializeObject(randomItem),
-                Headers = new Dictionary<string, string> {
-                    { "Content-Type", "application/json" },
-                    { "Access-Control-Allow-Origin", "*" }
-                }
-            };
 
-            return response;
+            var itemRepo = new ItemRepository();
+
+            var randomItem = await itemRepo.GetRandomItem();
+
+            return Ok(JsonConvert.SerializeObject(randomItem));
         }
 
         /// <summary>
@@ -78,34 +70,22 @@ namespace DetektivKollektiv.LambdaFunctions
                 }
                 else
                 {
-                    var response = new APIGatewayProxyResponse
-                    {
-                        StatusCode = (int)HttpStatusCode.OK,
-                        Body = JsonConvert.SerializeObject(result),
-                        Headers = new Dictionary<string, string> {
-                            { "Content-Type", "application/json" } ,
-                            { "Access-Control-Allow-Origin", "*" }
-                        }
-                    };
-                    return response;
+                    return Ok(JsonConvert.SerializeObject(result));
                 }
             }
         }
 
-        private async Task<Item> InternalGetRandomItemAsync()
+        private APIGatewayProxyResponse Ok(string body)
         {
-            var rand = new Random();
-
-            using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
-            using (var context = new DynamoDBContext(client))
-
+            return new APIGatewayProxyResponse
             {
-                var response = await client.ScanAsync(new ScanRequest("items"));
-                int itemLength = response.Count;
-                int randomItemId = rand.Next(itemLength) + 1;
-                var randomItem = await context.LoadAsync<Item>(randomItemId);
-                return randomItem;
-            }
+                StatusCode = (int)HttpStatusCode.OK,
+                Body = body,
+                Headers = new Dictionary<string, string> {
+                            { "Content-Type", "application/json" },
+                            { "Access-Control-Allow-Origin", "*" }
+                        }
+            };
         }
     }
 }
