@@ -7,7 +7,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "FunctionName": "GetRandomItem",
-        "Handler": "DK_Prototyp::DK_Prototyp.Functions::GetRandomItemAsync",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.LambdaFunctions.Functions::GetRandomItemAsync",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
         "MemorySize": 128,
@@ -31,7 +31,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "FunctionName": "CheckItem",
-        "Handler": "DK_Prototyp::DK_Prototyp.Functions::CheckItemAsync",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.LambdaFunctions.Functions::CheckItemAsync",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
         "MemorySize": 128,
