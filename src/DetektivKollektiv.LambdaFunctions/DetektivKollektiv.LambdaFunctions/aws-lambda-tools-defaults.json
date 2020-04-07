@@ -9,7 +9,9 @@
   "region": "eu-central-1",
   "configuration": "Release",
   "framework": "netcoreapp3.1",
-  "s3-prefix": "DetektivKollektiv.LambdaFunctions/",
-  "template": "serverless.template",
-  "template-parameters": ""
+  "function-runtime": "dotnetcore3.1",
+  "function-memory-size": 256,
+  "function-timeout": 30,
+  "function-handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetRandomItemAsync",
+  "template": "serverless.template"
 }

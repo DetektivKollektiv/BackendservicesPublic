@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.LambdaJsonSerializer))]
 
-namespace DetektivKollektiv.LambdaFunctions
+namespace DetektivKollektiv
 {
     public class Functions
     {
