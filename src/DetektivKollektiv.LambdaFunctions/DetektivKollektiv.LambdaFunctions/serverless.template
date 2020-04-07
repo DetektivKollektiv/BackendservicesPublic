@@ -20,18 +20,42 @@
           "RootGet": {
             "Type": "Api",
             "Properties": {
-              "Path": "/",
+              "Path": "/random",
               "Method": "GET"
             }
           }
         }
       }
     },
-    "CheckItem": {
+    "GetItem": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "GetRandomItem",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetItemByIdAsync",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/item",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "GetitemByTextAsync": {
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "FunctionName": "CheckItem",
-        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CheckItemAsync",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetitemByTextAsync",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
         "MemorySize": 128,
@@ -45,6 +69,54 @@
             "Type": "Api",
             "Properties": {
               "Path": "/",
+              "Method": "PUT"
+            }
+          }
+        }
+      }
+    },
+    "CreateNewItem": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "CheckItem",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CreateNewItem",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/NewItem",
+              "Method": "PUT"
+            }
+          }
+        }
+      }
+    },
+    "CheckItem": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "CheckItem",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CheckItem",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/CheckItem",
               "Method": "PUT"
             }
           }
