@@ -28,7 +28,7 @@ namespace DetektivKollektiv
 
             try
             {
-                int checkId = Int32.Parse(request.Body);
+                string checkId = request.Body;
 
                 ItemRepository repo = new ItemRepository();
 
@@ -36,7 +36,7 @@ namespace DetektivKollektiv
 
                 return Ok(JsonConvert.SerializeObject(item));
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
                 return NoContent();
             }           
@@ -87,9 +87,10 @@ namespace DetektivKollektiv
         {
             try
             {
-                Item newItem = JsonConvert.DeserializeObject<Item>(request.Body); ItemRepository repo = new ItemRepository();
+                string text = request.Body; 
+                ItemRepository repo = new ItemRepository();
 
-                Item responseItem = await repo.CreateItem(newItem);
+                Item responseItem = await repo.CreateItem(text);
 
                 if (responseItem == null)
                 {
@@ -97,10 +98,10 @@ namespace DetektivKollektiv
                 }
                 else
                 {
-                    return Ok(JsonConvert.SerializeObject(newItem));
+                    return Ok(JsonConvert.SerializeObject(responseItem));
                 }
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 return NoContent();
             }
@@ -119,19 +120,22 @@ namespace DetektivKollektiv
 
             if(item == null)
             {
-                item = new Item();
-                item.Text = text;
-                item.ItemId = rnd.Next();
-                item.ReviewBad = 0;
-                item.ReviewGood = 0;
-
-                await repo.CreateItem(item);
+                await repo.CreateItem(text);
                 return Ok("Item created");
             }
             else
             {
                 return Ok(JsonConvert.SerializeObject(item));
             }
+        }
+
+        public async Task<APIGatewayProxyResponse> Review(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            ItemRepository repo = new ItemRepository();
+            Review review = JsonConvert.DeserializeObject<Review>(request.Body);
+            Item response = await repo.Review(review.itemId, review.goodReview);
+            return Ok(JsonConvert.SerializeObject(response));
+        
         }
         private APIGatewayProxyResponse Ok(string body)
         {

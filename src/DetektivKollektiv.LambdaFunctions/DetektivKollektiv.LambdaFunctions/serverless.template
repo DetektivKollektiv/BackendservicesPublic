@@ -30,7 +30,7 @@
     "GetItem": {
       "Type": "AWS::Serverless::Function",
       "Properties": {
-        "FunctionName": "GetRandomItem",
+        "FunctionName": "GetItem",
         "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetItemByIdAsync",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
@@ -51,10 +51,10 @@
         }
       }
     },
-    "GetitemByTextAsync": {
+    "GetitemByText": {
       "Type": "AWS::Serverless::Function",
       "Properties": {
-        "FunctionName": "CheckItem",
+        "FunctionName": "GetitemByText",
         "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetitemByTextAsync",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
@@ -78,7 +78,7 @@
     "CreateNewItem": {
       "Type": "AWS::Serverless::Function",
       "Properties": {
-        "FunctionName": "CheckItem",
+        "FunctionName": "CreateNewItem",
         "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CreateNewItem",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
@@ -123,6 +123,30 @@
         }
       }
     },
+    "ReviewItem": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "ReviewItem",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::Review",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/Review",
+              "Method": "PUT"
+            }
+          }
+        }
+      }
+    },
     "readingListDynamoDBTable" : {
 			"Type" : "AWS::DynamoDB::Table",
 			"Properties" : {
@@ -130,7 +154,7 @@
 				"AttributeDefinitions" : [
 					{
 						"AttributeName" : "ItemId",
-						"AttributeType" : "N"   
+						"AttributeType" : "S"   
 					}
 				],
 				"KeySchema" : [

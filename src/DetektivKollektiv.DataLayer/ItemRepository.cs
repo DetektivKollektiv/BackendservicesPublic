@@ -12,28 +12,29 @@ namespace DetektivKollektiv.DataLayer
     public class ItemRepository : IItemRepository
     {
 
-        public Task<IEnumerable<Item>> GetAllItems()
+        public async Task<IEnumerable<Item>> GetAllItems()
         {
-              throw new NotImplementedException();
+            throw new NotImplementedException();
+
         }
 
-        public async Task<Item> GetRandomItem()
+            public async Task<Item> GetRandomItem()
         {
-            var rand = new Random();
+            //TODO: anpassen
 
             using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
-            using (var context = new DynamoDBContext(client))
-
-            {
-                var response = await client.ScanAsync(new ScanRequest("items"));
-                int itemLength = response.Count;
-                int randomItemId = rand.Next(itemLength) + 1;
-                var randomItem = await context.LoadAsync<Item>(randomItemId);
+            using (var dbContext = new DynamoDBContext(client)) {
+                string randomId = Guid.NewGuid().ToString();
+                var conditions = new List<ScanCondition> { new ScanCondition("ItemId", ScanOperator.NotEqual, randomId)};
+                var result = await dbContext.ScanAsync<Item>(conditions).GetRemainingAsync();
+                int resultLength = result.Count;
+                int randomEntry = new Random().Next(resultLength);
+                Item randomItem = result[randomEntry];
                 return randomItem;
-            }
+             }
         }
 
-        public async Task<Item> GetItemById(int id)
+        public async Task<Item> GetItemById(string id)
         {
             using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
             using (var context = new DynamoDBContext(client))
@@ -62,16 +63,46 @@ namespace DetektivKollektiv.DataLayer
             }
         }
 
-        public async Task<Item> CreateItem(Item item)
+        public async Task<Item> CreateItem(string text)
         {
-            int itemId = item.ItemId;
+            Item item = new Item();
+            item.Text = text;
+            item.ReviewBad = 0;
+            item.ReviewGood = 0;
+            item.ItemId = Guid.NewGuid().ToString();
                         
             using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
             using (var dbContext = new DynamoDBContext(client))
             {
                 await dbContext.SaveAsync<Item>(item);
-                return await GetItemById(itemId);
+                return await GetItemById(item.ItemId);
             }
+        }
+
+        public Task<Item> CreateItem(Item item)
+        {
+            throw new NotImplementedException();
+        }
+       
+        public async Task<Item> Review(string id, bool goodReview)
+        {
+            Item item = await GetItemById(id);
+            if (goodReview)
+            {
+                item.ReviewGood++;
+            }
+            else
+            {
+                item.ReviewBad++;
+            }
+
+            using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
+            using (var dbContext = new DynamoDBContext(client))
+            {
+                await dbContext.SaveAsync<Item>(item);
+            }
+                return item;
+
         }
     }
 }
