@@ -147,7 +147,7 @@
             "Type": "Api",
             "Properties": {
               "Path": "/Review",
-              "Method": "PUT"
+              "Method": "POST"
             }
           }
         }
