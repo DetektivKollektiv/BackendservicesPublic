@@ -7,6 +7,7 @@ using DetektivKollektiv.DataLayer.Abstraction;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ThirdParty.Json.LitJson;
 
 namespace DetektivKollektiv.DataLayer
 {
@@ -16,10 +17,20 @@ namespace DetektivKollektiv.DataLayer
         public ItemRepository(ILambdaLogger logger) {
              _logger = logger;
         }
+        /// <summary>
+        /// Returns all items from the database
+        /// </summary>
+        /// <returns>All items in an IEnumerable object</returns>
         public async Task<IEnumerable<Item>> GetAllItems()
         {
-            throw new NotImplementedException();
-
+            _logger.LogLine("INFO: GetAllItems Method initiated");
+            using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
+            using (var dbContext = new DynamoDBContext(client))
+            {
+                var conditions = new List<ScanCondition>();
+                var allItems = await dbContext.ScanAsync<Item>(conditions).GetRemainingAsync();
+                return(allItems);
+            }
         }
         /// <summary>
         /// Returns a random item

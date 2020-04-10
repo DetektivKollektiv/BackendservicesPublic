@@ -21,12 +21,12 @@ namespace DetektivKollektiv.LambdaFunctions
             };
         }
 
-        public static APIGatewayProxyResponse NoContent()
+        public static APIGatewayProxyResponse NoContent(string body)
         {
             return new APIGatewayProxyResponse
             {
                 StatusCode = (int)HttpStatusCode.NoContent,
-                Body = null,
+                Body = body,
                 Headers = new Dictionary<string, string> {
                             { "Content-Type", "application/json" },
                             { "Access-Control-Allow-Origin", "*" }
@@ -72,5 +72,19 @@ namespace DetektivKollektiv.LambdaFunctions
                         }
             };
         }
+
+        public static APIGatewayProxyResponse InternalServerError(string body)
+        {
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.InternalServerError,
+                Body = body,
+                Headers = new Dictionary<string, string> {
+                            { "Content-Type", "application/json" },
+                            { "Access-Control-Allow-Origin", "*" }
+                        }
+            };
+        }
+
     }
 }

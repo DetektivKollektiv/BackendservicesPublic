@@ -8,6 +8,7 @@ using DetektivKollektiv.LambdaFunctions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -23,23 +24,67 @@ namespace DetektivKollektiv
         public Functions()
         {
         }
-
-        public async Task<APIGatewayProxyResponse> GetItemByIdAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        /// <summary>
+        /// Returns an item with the specified id
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns>If an item was found, HTTP Code 200 and the item in JSON notation</returns>
+        /// <returns>If no item was found, HTTP Code 204</returns>
+        public async Task<APIGatewayProxyResponse> GetItemAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
+            context.Logger.LogLine("INFO: GetItem initiated");
+            ItemRepository repo = new ItemRepository(context.Logger);
+
             try
             {
-                string checkId = request.Body;
+                context.Logger.LogLine("INFO: Checking if itemId is in path");
+                
+                string checkId = "";
 
-                ItemRepository repo = new ItemRepository(context.Logger);
-
-                Item item = await repo.GetItemById(checkId);
-
-                return Responses.Ok(JsonConvert.SerializeObject(item));
+                if(request.PathParameters.TryGetValue("itemId", out checkId))
+                {
+                    context.Logger.LogLine("INFO: itemId found in path. Checking database for item");
+                    
+                    Item item = await repo.GetItemById(checkId);
+                    if (item == null)
+                    {
+                        context.Logger.LogLine("INFO: No database entry found with the specified id. Returning 404");
+                        return Responses.NotFound("No item found with the specified id");
+                    }
+                    else
+                    {
+                        context.Logger.LogLine("INFO: Item found. Returning item.");
+                        return Responses.Ok(JsonConvert.SerializeObject(item));
+                    }
+                }
+                else
+                {
+                    context.Logger.LogLine("ERROR: No itemId in path.");
+                    return Responses.InternalServerError("Could not process path correctly");
+                    
+                }                
             }
-            catch (FormatException)
+            catch (ArgumentNullException)
             {
-                return Responses.NoContent();
+                return Responses.InternalServerError("Could not parse itemId parameter");
             }           
+        }
+
+        public async Task<APIGatewayProxyResponse> GetAllItemsAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            ItemRepository repo = new ItemRepository(context.Logger);
+            IEnumerable<Item> allItems = await repo.GetAllItems();
+            if (allItems.Any())
+            {
+                context.Logger.LogLine("INFO: Table not empty. Returning all items");
+                return Responses.Ok(JsonConvert.SerializeObject(allItems));
+            }
+            else
+            {
+                context.Logger.LogLine("INFO: No items found in database. Returning 204.");
+                return Responses.NoContent("No items in database");
+            }
         }
 
         /// <summary>
@@ -75,7 +120,7 @@ namespace DetektivKollektiv
 
             if (item == null)
             {
-                return Responses.NoContent();
+                return Responses.NoContent("");
             }
             else
             {
@@ -94,7 +139,7 @@ namespace DetektivKollektiv
 
                 if (responseItem == null)
                 {
-                    return Responses.NoContent();
+                    return Responses.NoContent("");
                 }
                 else
                 {
@@ -103,7 +148,7 @@ namespace DetektivKollektiv
             }
             catch(Exception)
             {
-                return Responses.NoContent();
+                return Responses.NoContent("");
             }
             
         }
