@@ -39,6 +39,7 @@ namespace DetektivKollektiv.DataLayer
         /// Returns a random <see cref="Item"/>
         /// </summary>
         /// <returns>A random <see cref="Item"/> from the database</returns>
+        
         public async Task<Item> GetRandomItem()
         {
             _logger.LogLine("INFO: Retrieving random item from database.");
@@ -74,6 +75,7 @@ namespace DetektivKollektiv.DataLayer
         /// <param name="id">The id of the desired item</param>
         /// <returns>The desired item</returns>
         /// <returns>null, if no obejct was found</returns>
+        
         public async Task<Item> GetItemById(string id)
         {
             using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
@@ -84,7 +86,12 @@ namespace DetektivKollektiv.DataLayer
                 return item;
             }
         }
-
+        /// <summary>
+        /// Checks the database for items with the specified text.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns>The item, if it exists</returns>
+        /// <returns>Null, if the item does not exist</returns>
         public async Task<Item> GetItemByText(string text)
         {
             using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))

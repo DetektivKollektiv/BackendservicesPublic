@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -24,6 +25,57 @@ namespace DetektivKollektiv
         public Functions()
         {
         }
+
+        /// <summary>
+        /// Returns all <see cref="Item"/>s from the database or the item, that matches the bodies conditions.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns>If the table is not empty, HTTP Code 200 and all <see cref="Item"/>s in JSON notation</returns>
+        /// <returns>If the table is empty, HTTP Code 204</returns>
+        /// <returns>If a body is specified and an item exists, HTTP Code 200 and the item</returns>
+        /// <returns>If a body is specified and no item exists, HTTP Code 404.</returns>
+        public async Task<APIGatewayProxyResponse> GetItemsAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            context.Logger.LogLine("INFO: GetAllItems Initiated. Checking if body exists.");
+            ItemRepository repo = new ItemRepository(context.Logger);
+
+            if (request.Body == null)
+            {
+                context.Logger.LogLine("INFO: No Body found. Checking if table is empty.");
+                IEnumerable<Item> allItems = await repo.GetAllItems();
+                if (allItems.Any())
+                {
+                    context.Logger.LogLine("INFO: Table not empty. Returning all items");
+                    return Responses.Ok(JsonConvert.SerializeObject(allItems));
+                }
+                else
+                {
+                    context.Logger.LogLine("INFO: No items found in database. Returning 204.");
+                    return Responses.NoContent("No items in database");
+                }
+            }
+            else
+            {
+                context.Logger.LogLine("INFO: Body exists. Trying to return item");
+                string checkText = request.Body;
+                Item item = await repo.GetItemByText(checkText);
+
+                if (item == null)
+                {
+                    context.Logger.LogLine("WARNING: Item does not exist. Returning 404.");
+                    return Responses.NotFound("No item found");
+                }
+                else
+                {
+                    context.Logger.LogLine("INFO: Item found. Returning 200.");
+                    return Responses.Ok(JsonConvert.SerializeObject(item));
+                }
+            }
+
+        }
+
+
         /// <summary>
         /// Returns an <see cref="Item"/> with the specified id
         /// </summary>
@@ -31,7 +83,7 @@ namespace DetektivKollektiv
         /// <param name="context"></param>
         /// <returns>If an <see cref="Item"/> was found, HTTP Code 200 and the item in JSON notation</returns>
         /// <returns>If no <see cref="Item"/> was found, HTTP Code 204</returns>
-        public async Task<APIGatewayProxyResponse> GetItemAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        public async Task<APIGatewayProxyResponse> GetItemByIdAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             context.Logger.LogLine("INFO: GetItem initiated");
             ItemRepository repo = new ItemRepository(context.Logger);
@@ -71,30 +123,7 @@ namespace DetektivKollektiv
             }           
         }
 
-        /// <summary>
-        /// Returns all <see cref="Item"/>s from the database
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="context"></param>
-        /// <returns>If the table is not empty, HTTP Code 200 and all <see cref="Item"/>s in JSON notation</returns>
-        /// <returns>If the table is empty, HTTP Code 204</returns>
-        public async Task<APIGatewayProxyResponse> GetAllItemsAsync(APIGatewayProxyRequest request, ILambdaContext context)
-        {
-            context.Logger.LogLine("INFO: GetAllItems Initiated");
-            ItemRepository repo = new ItemRepository(context.Logger);
-            IEnumerable<Item> allItems = await repo.GetAllItems();
-            if (allItems.Any())
-            {
-                context.Logger.LogLine("INFO: Table not empty. Returning all items");
-                return Responses.Ok(JsonConvert.SerializeObject(allItems));
-            }
-            else
-            {
-                context.Logger.LogLine("INFO: No items found in database. Returning 204.");
-                return Responses.NoContent("No items in database");
-            }
-        }
-
+        
         /// <summary>
         /// A Lambda function to get a random <see cref="Item"/>.
         /// </summary>
@@ -111,7 +140,7 @@ namespace DetektivKollektiv
 
             if(randomItem != null)
             {
-                context.Logger.LogLine("INFO: Got random item. Returning item.");
+                context.Logger.LogLine("INFO: Got random item. Returning 200.");
                 return Responses.Ok(JsonConvert.SerializeObject(randomItem));
             }
             else
@@ -127,8 +156,10 @@ namespace DetektivKollektiv
         /// <param name="request"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public async Task<APIGatewayProxyResponse> GetItemByTextAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        /*public async Task<APIGatewayProxyResponse> GetItemByTextAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
+            context.Logger.LogLine("INFO: GetItemByText initiated. Checking if item exists");
+            
             string checkText = request.Body;
 
             ItemRepository repo = new ItemRepository(context.Logger);
@@ -137,43 +168,72 @@ namespace DetektivKollektiv
 
             if (item == null)
             {
-                return Responses.NoContent("");
+                context.Logger.LogLine("WARNING: Item does not exist. Returning 400.");
+                return Responses.BadRequest("No item found");
             }
             else
             {
+                context.Logger.LogLine("INFO: Item found. Returning 200.");
                 return Responses.Ok(JsonConvert.SerializeObject(item));
             }        
-        }
+        }*/
 
-        public async Task<APIGatewayProxyResponse> CreateNewItem(APIGatewayProxyRequest request, ILambdaContext context)
+        /// <summary>
+        /// Creates a new <see cref="Item"/> in the database
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns>If the <see cref="Item"/> was created succesfully, HTTP code 201 and the newly created <see cref="Item"/></returns>
+        /// <returns>If the <see cref="Item"/> could not be created, HTTP code 400.</returns>
+        public async Task<APIGatewayProxyResponse> CreateNewItemAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
+            context.Logger.LogLine("INFO: CreateNewItem initiated");
             try
             {
                 string text = request.Body; 
                 ItemRepository repo = new ItemRepository(context.Logger);
+                context.Logger.LogLine("INFO: Checking if item exists already");
 
-                Item responseItem = await repo.CreateItem(text);
-
-                if (responseItem == null)
+                Item item = await repo.GetItemByText(text);
+                if(item == null)
                 {
-                    return Responses.NoContent("");
+                    context.Logger.LogLine("INFO: Item does not exist yet. Trying to create new item");
+                    Item responseItem = await repo.CreateItem(text); 
+                    if (responseItem == null)
+                    {
+                        context.Logger.LogLine("ERROR: Item could not be created.");
+                        return Responses.InternalServerError("Could not create new item");
+                    }
+                    else
+                    {
+                        context.Logger.LogLine("INFO: Item successfully created. Returning 201.");
+                        return Responses.Created(JsonConvert.SerializeObject(responseItem));
+                    }
                 }
                 else
                 {
-                    return Responses.Ok(JsonConvert.SerializeObject(responseItem));
+                    context.Logger.LogLine("WARNING: Item already exists. Returning 400.");
+                    return Responses.BadRequest("Item already exists");
                 }
             }
             catch(Exception)
             {
-                return Responses.NoContent("");
+                context.Logger.LogLine("ERROR: Caught an exception. Returning 400");
+                return Responses.BadRequest("The item could not be created");
             }
             
         }
-
-        public async Task<APIGatewayProxyResponse> CheckItem(APIGatewayProxyRequest request, ILambdaContext context)
+        
+        /// <summary>
+        /// Checks, if an item exists. If it exists, it is returned. If it does not exist, it is created.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns>If the item was created, HTTP status code 201 and the new item.</returns>
+        /// <returns>If the item exists already, HTTP status code 200 and the existing item.</returns>
+        public async Task<APIGatewayProxyResponse> CheckItemAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
-            Random rnd = new Random();
-            
+            context.Logger.LogLine("INFO: CheckItem initiated. Checking if item exists.");
             string text = request.Body;
 
             ItemRepository repo = new ItemRepository(context.Logger);
@@ -182,22 +242,39 @@ namespace DetektivKollektiv
 
             if(item == null)
             {
-                await repo.CreateItem(text);
-                return Responses.Ok("Item created");
+                context.Logger.LogLine("INFO: Item does not exist. Creating new item and returning 201");
+                Item newItem = await repo.CreateItem(text);
+                return Responses.Created(JsonConvert.SerializeObject(newItem));
             }
             else
             {
+                context.Logger.LogLine("INFO: Item exists already. Returning 200");
                 return Responses.Ok(JsonConvert.SerializeObject(item));
             }
         }
-
-        public async Task<APIGatewayProxyResponse> Review(APIGatewayProxyRequest request, ILambdaContext context)
-        {
-            ItemRepository repo = new ItemRepository(context.Logger);
-            Review review = JsonConvert.DeserializeObject<Review>(request.Body);
-            Item response = await repo.Review(review.itemId, review.goodReview);
-            return Responses.Ok(JsonConvert.SerializeObject(response));
         
+        /// <summary>
+        /// Creating a new review and updated the item accordingly.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns>The updated item</returns>
+        public async Task<APIGatewayProxyResponse> ReviewItemAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            context.Logger.LogLine("INFO: Review initiated. Trying to update item.");
+            try 
+            {                 
+                ItemRepository repo = new ItemRepository(context.Logger);
+                Review review = JsonConvert.DeserializeObject<Review>(request.Body);
+                Item response = await repo.Review(review.itemId, review.goodReview);
+                context.Logger.LogLine("INFO: Review successful. Returning 201.");
+                return Responses.Created(JsonConvert.SerializeObject(response));
+            }
+            catch (Exception)
+            {
+                context.Logger.LogLine("ERROR: Something went wrong. Returning 400");
+                return Responses.BadRequest("Could not create Review");
+            }
         }
     }
 
