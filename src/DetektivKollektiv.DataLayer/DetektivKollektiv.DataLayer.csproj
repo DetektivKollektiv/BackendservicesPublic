@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Amazon.Lambda.Core" Version="1.1.0" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.105.25" />
   </ItemGroup>
 

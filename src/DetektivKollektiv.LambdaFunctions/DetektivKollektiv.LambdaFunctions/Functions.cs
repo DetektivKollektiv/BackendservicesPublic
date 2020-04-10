@@ -4,6 +4,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using DetektivKollektiv.DataLayer;
+using DetektivKollektiv.LambdaFunctions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,20 +26,19 @@ namespace DetektivKollektiv
 
         public async Task<APIGatewayProxyResponse> GetItemByIdAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
-
             try
             {
                 string checkId = request.Body;
 
-                ItemRepository repo = new ItemRepository();
+                ItemRepository repo = new ItemRepository(context.Logger);
 
                 Item item = await repo.GetItemById(checkId);
 
-                return Ok(JsonConvert.SerializeObject(item));
+                return Responses.Ok(JsonConvert.SerializeObject(item));
             }
             catch (FormatException)
             {
-                return NoContent();
+                return Responses.NoContent();
             }           
         }
 
@@ -52,11 +52,11 @@ namespace DetektivKollektiv
         {
             context.Logger.LogLine("Get Request\n");
 
-            var itemRepo = new ItemRepository();
+            var itemRepo = new ItemRepository(context.Logger);
 
             var randomItem = await itemRepo.GetRandomItem();
 
-            return Ok(JsonConvert.SerializeObject(randomItem));
+            return Responses.Ok(JsonConvert.SerializeObject(randomItem));
         }
 
         /// <summary>
@@ -69,17 +69,17 @@ namespace DetektivKollektiv
         {
             string checkText = request.Body;
 
-            ItemRepository repo = new ItemRepository();
+            ItemRepository repo = new ItemRepository(context.Logger);
             
             Item item = await repo.GetItemByText(checkText);
 
             if (item == null)
             {
-                return NoContent();
+                return Responses.NoContent();
             }
             else
             {
-                return Ok(JsonConvert.SerializeObject(item));
+                return Responses.Ok(JsonConvert.SerializeObject(item));
             }        
         }
 
@@ -88,22 +88,22 @@ namespace DetektivKollektiv
             try
             {
                 string text = request.Body; 
-                ItemRepository repo = new ItemRepository();
+                ItemRepository repo = new ItemRepository(context.Logger);
 
                 Item responseItem = await repo.CreateItem(text);
 
                 if (responseItem == null)
                 {
-                    return NoContent();
+                    return Responses.NoContent();
                 }
                 else
                 {
-                    return Ok(JsonConvert.SerializeObject(responseItem));
+                    return Responses.Ok(JsonConvert.SerializeObject(responseItem));
                 }
             }
             catch(Exception)
             {
-                return NoContent();
+                return Responses.NoContent();
             }
             
         }
@@ -114,53 +114,28 @@ namespace DetektivKollektiv
             
             string text = request.Body;
 
-            ItemRepository repo = new ItemRepository();
+            ItemRepository repo = new ItemRepository(context.Logger);
 
             Item item = await repo.GetItemByText(text);
 
             if(item == null)
             {
                 await repo.CreateItem(text);
-                return Ok("Item created");
+                return Responses.Ok("Item created");
             }
             else
             {
-                return Ok(JsonConvert.SerializeObject(item));
+                return Responses.Ok(JsonConvert.SerializeObject(item));
             }
         }
 
         public async Task<APIGatewayProxyResponse> Review(APIGatewayProxyRequest request, ILambdaContext context)
         {
-            ItemRepository repo = new ItemRepository();
+            ItemRepository repo = new ItemRepository(context.Logger);
             Review review = JsonConvert.DeserializeObject<Review>(request.Body);
             Item response = await repo.Review(review.itemId, review.goodReview);
-            return Ok(JsonConvert.SerializeObject(response));
+            return Responses.Ok(JsonConvert.SerializeObject(response));
         
-        }
-        private APIGatewayProxyResponse Ok(string body)
-        {
-            return new APIGatewayProxyResponse
-            {
-                StatusCode = (int)HttpStatusCode.OK,
-                Body = body,
-                Headers = new Dictionary<string, string> {
-                            { "Content-Type", "application/json" },
-                            { "Access-Control-Allow-Origin", "*" }
-                        }
-            };
-        }
-
-        private APIGatewayProxyResponse NoContent()
-        {
-            return new APIGatewayProxyResponse
-            {
-                StatusCode = (int)HttpStatusCode.NoContent,
-                Body = null,
-                Headers = new Dictionary<string, string> {
-                            { "Content-Type", "application/json" },
-                            { "Access-Control-Allow-Origin", "*" }
-                        }
-            };
         }
     }
 

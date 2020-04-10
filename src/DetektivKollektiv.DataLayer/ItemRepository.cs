@@ -2,6 +2,7 @@
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
+using Amazon.Lambda.Core;
 using DetektivKollektiv.DataLayer.Abstraction;
 using System;
 using System.Collections.Generic;
@@ -11,17 +12,22 @@ namespace DetektivKollektiv.DataLayer
 {
     public class ItemRepository : IItemRepository
     {
-
+        private ILambdaLogger _logger;
+        public ItemRepository(ILambdaLogger logger) {
+             _logger = logger;
+        }
         public async Task<IEnumerable<Item>> GetAllItems()
         {
             throw new NotImplementedException();
 
         }
-
-            public async Task<Item> GetRandomItem()
+        /// <summary>
+        /// Returns a random item
+        /// </summary>
+        /// <returns>A random item from the database</returns>
+        public async Task<Item> GetRandomItem()
         {
-            //TODO: anpassen
-
+            _logger.LogLine("INFO: GetRandomItem Method initiated");
             using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
             using (var dbContext = new DynamoDBContext(client)) {
                 string randomId = Guid.NewGuid().ToString();
@@ -33,7 +39,12 @@ namespace DetektivKollektiv.DataLayer
                 return randomItem;
              }
         }
-
+        /// <summary>
+        /// Queries the database for the item with the specified id
+        /// </summary>
+        /// <param name="id">The id of the desired item</param>
+        /// <returns>The desired item</returns>
+        /// <returns>null, if no obejct was found</returns>
         public async Task<Item> GetItemById(string id)
         {
             using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
