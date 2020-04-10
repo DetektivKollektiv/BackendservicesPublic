@@ -122,7 +122,7 @@
             "Type": "Api",
             "Properties": {
               "Path": "/items/check",
-              "Method": "GET"
+              "Method": "POST"
             }
           }
         }
