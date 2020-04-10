@@ -25,12 +25,12 @@ namespace DetektivKollektiv
         {
         }
         /// <summary>
-        /// Returns an item with the specified id
+        /// Returns an <see cref="Item"/> with the specified id
         /// </summary>
         /// <param name="request"></param>
         /// <param name="context"></param>
-        /// <returns>If an item was found, HTTP Code 200 and the item in JSON notation</returns>
-        /// <returns>If no item was found, HTTP Code 204</returns>
+        /// <returns>If an <see cref="Item"/> was found, HTTP Code 200 and the item in JSON notation</returns>
+        /// <returns>If no <see cref="Item"/> was found, HTTP Code 204</returns>
         public async Task<APIGatewayProxyResponse> GetItemAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             context.Logger.LogLine("INFO: GetItem initiated");
@@ -71,8 +71,16 @@ namespace DetektivKollektiv
             }           
         }
 
+        /// <summary>
+        /// Returns all <see cref="Item"/>s from the database
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns>If the table is not empty, HTTP Code 200 and all <see cref="Item"/>s in JSON notation</returns>
+        /// <returns>If the table is empty, HTTP Code 204</returns>
         public async Task<APIGatewayProxyResponse> GetAllItemsAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
+            context.Logger.LogLine("INFO: GetAllItems Initiated");
             ItemRepository repo = new ItemRepository(context.Logger);
             IEnumerable<Item> allItems = await repo.GetAllItems();
             if (allItems.Any())
@@ -95,13 +103,22 @@ namespace DetektivKollektiv
         /// <returns>A random <see cref="Item"/> from the database.</returns>
         public async Task<APIGatewayProxyResponse> GetRandomItemAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
-            context.Logger.LogLine("Get Request\n");
+            context.Logger.LogLine("INFO: GetRandomItem initiated. Checking if random item exists");
 
             var itemRepo = new ItemRepository(context.Logger);
 
             var randomItem = await itemRepo.GetRandomItem();
 
-            return Responses.Ok(JsonConvert.SerializeObject(randomItem));
+            if(randomItem != null)
+            {
+                context.Logger.LogLine("INFO: Got random item. Returning item.");
+                return Responses.Ok(JsonConvert.SerializeObject(randomItem));
+            }
+            else
+            {
+                context.Logger.LogLine("INFO: No item found. Returning 204");
+                return Responses.NoContent("Could not retrieve a random item from database. The table seems to be empty.");
+            }
         }
 
         /// <summary>

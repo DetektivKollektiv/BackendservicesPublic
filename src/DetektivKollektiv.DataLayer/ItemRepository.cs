@@ -2,8 +2,11 @@
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
+using Amazon.DynamoDBv2.Model.Internal.MarshallTransformations;
 using Amazon.Lambda.Core;
 using DetektivKollektiv.DataLayer.Abstraction;
+using DetektivKollektiv.LambdaFunctions;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -33,22 +36,37 @@ namespace DetektivKollektiv.DataLayer
             }
         }
         /// <summary>
-        /// Returns a random item
+        /// Returns a random <see cref="Item"/>
         /// </summary>
-        /// <returns>A random item from the database</returns>
+        /// <returns>A random <see cref="Item"/> from the database</returns>
         public async Task<Item> GetRandomItem()
         {
-            _logger.LogLine("INFO: GetRandomItem Method initiated");
+            _logger.LogLine("INFO: Retrieving random item from database.");
             using (var client = new AmazonDynamoDBClient(Amazon.RegionEndpoint.EUCentral1))
-            using (var dbContext = new DynamoDBContext(client)) {
-                string randomId = Guid.NewGuid().ToString();
-                var conditions = new List<ScanCondition> { new ScanCondition("ItemId", ScanOperator.NotEqual, randomId)};
-                var result = await dbContext.ScanAsync<Item>(conditions).GetRemainingAsync();
-                int resultLength = result.Count;
-                int randomEntry = new Random().Next(resultLength);
-                Item randomItem = result[randomEntry];
-                return randomItem;
-             }
+            {
+                var lastKeyEvaluated = new Dictionary<string, AttributeValue>()
+                    {
+                        { "ItemId", new AttributeValue(Guid.NewGuid().ToString()) }
+                    };
+                var request = new ScanRequest()
+                {
+                    TableName = "items",
+                    ExclusiveStartKey = lastKeyEvaluated,
+                    Limit = 1
+                };
+                var response = await client.ScanAsync(request);
+                if (response.Items.Count == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    var responseItem = response.Items[0];
+                    Item randomItem = Converter.ConvertAttributesToItem(responseItem);
+
+                    return randomItem;
+                }
+            }
         }
         /// <summary>
         /// Queries the database for the item with the specified id
