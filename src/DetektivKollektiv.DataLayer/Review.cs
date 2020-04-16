@@ -6,8 +6,8 @@ namespace DetektivKollektiv.DataLayer
 {
     public class Review
     {
-        public string itemId { get; set; }
-        public bool goodReview{ get; set; }
+        public Guid ItemId { get; set; }
+        public bool GoodReview{ get; set; }
 
     }
 }
