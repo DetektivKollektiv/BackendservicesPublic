@@ -11,6 +11,8 @@
     <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.0.0" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.105.25" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Npgsql" Version="4.1.3.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\DetektivKollektiv.DataLayer\DetektivKollektiv.DataLayer.csproj" />

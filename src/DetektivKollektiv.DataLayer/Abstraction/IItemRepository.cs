@@ -10,18 +10,18 @@ namespace DetektivKollektiv.DataLayer.Abstraction
         /// </summary>
         /// <param name="item">The item to create.</param>
         /// <returns>The created item.</returns>
-        Task<Item> CreateItem(Item item);
+        Item CreateItem(string text);
         
         /// <summary>
         /// Returns a list of all <see cref="Item"/>
         /// </summary>
         /// <returns><see cref="IEnumerable{T}"/> of <see cref="Item"/></returns>
-        Task<IEnumerable<Item>> GetAllItems();
+        List<Item> GetAllItems();
 
         /// <summary>
         /// Returns a random <see cref="Item"/>.
         /// </summary>
         /// <returns><see cref="Item"/></returns>
-        Task<Item> GetRandomItem();
+        Item GetRandomItem();
     }
 }

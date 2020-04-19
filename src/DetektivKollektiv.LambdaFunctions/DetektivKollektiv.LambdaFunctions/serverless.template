@@ -7,8 +7,8 @@
     "GetItems": {
       "Type": "AWS::Serverless::Function",
       "Properties": {
-        "FunctionName": "GetItemsAsync",
-        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetItemsAsync",
+        "FunctionName": "GetItems",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetItems",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
         "MemorySize": 128,
@@ -33,7 +33,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "FunctionName": "GetItemById",
-        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetItemByIdAsync",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetItemById",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
         "MemorySize": 128,
@@ -58,7 +58,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "FunctionName": "GetRandomItem",
-        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetRandomItemAsync",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetRandomItem",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
         "MemorySize": 128,
@@ -83,7 +83,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "FunctionName": "CreateNewItem",
-        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CreateNewItemAsync",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CreateNewItem",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
         "MemorySize": 128,
@@ -108,7 +108,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "FunctionName": "CheckItem",
-        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CheckItemAsync",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CheckItem",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
         "MemorySize": 128,
@@ -133,7 +133,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "FunctionName": "ReviewItem",
-        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::ReviewItemAsync",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::ReviewItem",
         "Runtime": "dotnetcore3.1",
         "CodeUri": "",
         "MemorySize": 128,
@@ -152,33 +152,9 @@
           }
         }
       }
+    }
     },
         
-    "readingListDynamoDBTable" : {
-			"Type" : "AWS::DynamoDB::Table",
-			"Properties" : {
-				"TableName" : "items",
-				"AttributeDefinitions" : [
-					{
-						"AttributeName" : "ItemId",
-						"AttributeType" : "S"   
-					}
-				],
-				"KeySchema" : [
-					{
-						"AttributeName" : "ItemId",
-						"KeyType" : "HASH"
-					}
-				],
-				"ProvisionedThroughput" : {
-					"ReadCapacityUnits" : "1",
-					"WriteCapacityUnits" : "1"
-				}
-			}
-		}
-
-  },
-
   "Outputs": {
     "ApiURL": {
       "Description": "API endpoint URL for Prod environment",
