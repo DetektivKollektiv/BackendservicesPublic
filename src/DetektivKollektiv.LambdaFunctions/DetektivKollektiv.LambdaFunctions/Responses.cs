@@ -1,8 +1,6 @@
-﻿using System;
+﻿using Amazon.Lambda.APIGatewayEvents;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
-using Amazon.Lambda.APIGatewayEvents;
 
 namespace DetektivKollektiv.LambdaFunctions
 {

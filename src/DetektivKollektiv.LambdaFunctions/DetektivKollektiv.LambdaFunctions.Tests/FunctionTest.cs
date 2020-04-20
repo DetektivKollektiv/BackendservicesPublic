@@ -22,7 +22,7 @@ namespace DetektivKollektiv.LambdaFunctions.Tests
 
             request = new APIGatewayProxyRequest();
             context = new TestLambdaContext();
-            response = await functions.GetRandomItem(request, context);
+            response = functions.GetRandomItem(request, context);
             Assert.NotNull(response);
         }
     }

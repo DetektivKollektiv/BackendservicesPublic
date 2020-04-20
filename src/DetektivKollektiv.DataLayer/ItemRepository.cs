@@ -1,17 +1,22 @@
 ﻿using Amazon.Lambda.Core;
+using DatektivKollektiv.Shared;
 using DetektivKollektiv.DataLayer.Abstraction;
-using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace DetektivKollektiv.DataLayer
 {
     public class ItemRepository : IItemRepository
     {
-        private ILambdaLogger _logger;
-        public ItemRepository(ILambdaLogger logger) {
+        private readonly ILambdaLogger _logger;
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ItemRepository"/>
+        /// </summary>
+        /// <param name="logger">Instance of the <see cref="ILambdaLogger"/></param>
+        public ItemRepository(ILambdaLogger logger) 
+        {
              _logger = logger;
         }
 
@@ -21,7 +26,7 @@ namespace DetektivKollektiv.DataLayer
         /// <returns>All items in an IEnumerable object</returns>
         public List<Item> GetAllItems()
         {
-            _logger.LogLine("INFO: GetAllItems Method initiated");
+            _logger.LogInfo("GetAllItems Method initiated");
 
             using (var itemContext = new ItemContext())
             {
@@ -36,7 +41,7 @@ namespace DetektivKollektiv.DataLayer
         /// <returns>A random <see cref="Item"/> from the database</returns>
         public Item GetRandomItem()
         {
-            _logger.LogLine("INFO: Retrieving random item from database.");
+            _logger.LogInfo("Retrieving random item from database.");
 
             using (var itemContext = new ItemContext())
             {
@@ -93,11 +98,13 @@ namespace DetektivKollektiv.DataLayer
 
         public Item CreateItem(string text)
         {
-            Item item = new Item();
-            item.Text = text;
-            item.ReviewBad = 0;
-            item.ReviewGood = 0;
-            item.ItemId = Guid.NewGuid();
+            Item item = new Item
+            {
+                Text = text,
+                ReviewBad = 0,
+                ReviewGood = 0,
+                ItemId = Guid.NewGuid()
+            };
 
             using (var itemContext = new ItemContext())
             {
