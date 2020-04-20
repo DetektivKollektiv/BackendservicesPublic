@@ -1,8 +1,10 @@
-﻿namespace DetektivKollektiv.DataLayer
+﻿using System;
+
+namespace DetektivKollektiv.DataLayer
 {
     public class Item
     {
-        public System.Guid ItemId { get; set; }
+        public Guid ItemId { get; set; }
         public string Text { get; set; }
         public int ReviewGood { get; set; }
         public int ReviewBad { get; set; }
