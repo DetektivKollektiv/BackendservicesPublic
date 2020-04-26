@@ -1,0 +1,166 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "An AWS Serverless Application.",
+  "Resources": {
+    
+    "GetItems": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "GetItems",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetItems",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/items",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    
+    "GetItemById": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "GetItemById",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetItemById",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/items/{itemId}",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    
+    "GetRandomItem": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "GetRandomItem",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::GetRandomItem",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/items/random",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+
+    "CreateNewItem": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "CreateNewItem",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CreateNewItem",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/items",
+              "Method": "POST"
+            }
+          }
+        }
+      }
+    },
+    
+    "CheckItem": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "CheckItem",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::CheckItem",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/items/check",
+              "Method": "POST"
+            }
+          }
+        }
+      }
+    },
+    
+    "ReviewItem": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": "ReviewItem",
+        "Handler": "DetektivKollektiv::DetektivKollektiv.Functions::ReviewItem",
+        "Runtime": "dotnetcore3.1",
+        "CodeUri": "",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [
+          "AWSLambdaFullAccess"
+        ],
+        "Events": {
+          "RootGet": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/Review",
+              "Method": "POST"
+            }
+          }
+        }
+      }
+    }
+    },
+        
+  "Outputs": {
+    "ApiURL": {
+      "Description": "API endpoint URL for Prod environment",
+      "Value": {
+        "Fn::Sub": "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+      }
+    }
+  }
+}
